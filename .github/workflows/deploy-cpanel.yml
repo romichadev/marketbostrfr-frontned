@@ -37,41 +37,23 @@ jobs:
 
       - name: Validate deployment secrets
         env:
-          CPANEL_SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
-          CPANEL_SSH_USERNAME: ${{ secrets.CPANEL_SSH_USERNAME }}
-          CPANEL_SSH_PRIVATE_KEY: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           CPANEL_REMOTE_DIR: ${{ vars.CPANEL_REMOTE_DIR }}
-          CPANEL_SSH_PORT: ${{ vars.CPANEL_SSH_PORT }}
-          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH }}
         run: |
-          test -n "$CPANEL_SSH_HOST" || (echo "Missing secret: CPANEL_SSH_HOST" && exit 1)
-          test -n "$CPANEL_SSH_USERNAME" || (echo "Missing secret: CPANEL_SSH_USERNAME" && exit 1)
-          test -n "$CPANEL_SSH_PRIVATE_KEY" || (echo "Missing secret: CPANEL_SSH_PRIVATE_KEY" && exit 1)
+          test -n "$FTP_SERVER" || (echo "Missing secret: FTP_SERVER" && exit 1)
+          test -n "$FTP_USERNAME" || (echo "Missing secret: FTP_USERNAME" && exit 1)
+          test -n "$FTP_PASSWORD" || (echo "Missing secret: FTP_PASSWORD" && exit 1)
           test -n "$CPANEL_REMOTE_DIR" || (echo "Missing variable: CPANEL_REMOTE_DIR" && exit 1)
-          test -n "$CPANEL_SSH_PORT" || (echo "Missing variable: CPANEL_SSH_PORT" && exit 1)
-          test -n "$VITE_BASE_PATH" || (echo "Missing variable: VITE_BASE_PATH" && exit 1)
 
-      - name: Start SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Deploy dist to cPanel via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          ssh-private-key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
-
-      - name: Ensure remote directory exists
-        env:
-          CPANEL_SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
-          CPANEL_SSH_PORT: ${{ vars.CPANEL_SSH_PORT }}
-          CPANEL_SSH_USERNAME: ${{ secrets.CPANEL_SSH_USERNAME }}
-          CPANEL_REMOTE_DIR: ${{ vars.CPANEL_REMOTE_DIR }}
-        run: |
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p "${CPANEL_SSH_PORT:-22}" "$CPANEL_SSH_USERNAME@$CPANEL_SSH_HOST" "mkdir -p '$CPANEL_REMOTE_DIR'"
-
-      - name: Deploy dist to cPanel via SSH
-        env:
-          CPANEL_SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
-          CPANEL_SSH_PORT: ${{ vars.CPANEL_SSH_PORT }}
-          CPANEL_SSH_USERNAME: ${{ secrets.CPANEL_SSH_USERNAME }}
-          CPANEL_REMOTE_DIR: ${{ vars.CPANEL_REMOTE_DIR }}
-        run: |
-          rsync -avz --omit-dir-times --no-perms \
-            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${CPANEL_SSH_PORT:-22}" \
-            ./dist/ "$CPANEL_SSH_USERNAME@$CPANEL_SSH_HOST:$CPANEL_REMOTE_DIR"
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./dist/
+          server-dir: ${{ vars.CPANEL_REMOTE_DIR }}
+          port: 21
