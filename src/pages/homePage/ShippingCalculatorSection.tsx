@@ -47,7 +47,7 @@ export default function ShippingCalculatorSection() {
           <div className="flex flex-col gap-6">
             <div className="max-w-md">
               <h2 className="text-3xl md:text-4xl font-semibold font-arima leading-snug md:leading-[150%] text-white mb-3 text-balance">
-                Estimate delivery to overseas territories
+                Estimate delivery tos overseas territories
               </h2>
               <p className="text-gray-300 text-base md:text-lg font-roboto leading-relaxed">
                 Transparent, competitive pricing for shipping to all DOM-TOM
