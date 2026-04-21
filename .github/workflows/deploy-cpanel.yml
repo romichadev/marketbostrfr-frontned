@@ -56,14 +56,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
 
-      - name: Add server to known_hosts
-        env:
-          CPANEL_SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
-          CPANEL_SSH_PORT: ${{ vars.CPANEL_SSH_PORT }}
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p "${CPANEL_SSH_PORT:-22}" -H "$CPANEL_SSH_HOST" >> ~/.ssh/known_hosts
-
       - name: Ensure remote directory exists
         env:
           CPANEL_SSH_HOST: ${{ secrets.CPANEL_SSH_HOST }}
@@ -71,7 +63,7 @@ jobs:
           CPANEL_SSH_USERNAME: ${{ secrets.CPANEL_SSH_USERNAME }}
           CPANEL_REMOTE_DIR: ${{ vars.CPANEL_REMOTE_DIR }}
         run: |
-          ssh -p "${CPANEL_SSH_PORT:-22}" "$CPANEL_SSH_USERNAME@$CPANEL_SSH_HOST" "mkdir -p '$CPANEL_REMOTE_DIR'"
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p "${CPANEL_SSH_PORT:-22}" "$CPANEL_SSH_USERNAME@$CPANEL_SSH_HOST" "mkdir -p '$CPANEL_REMOTE_DIR'"
 
       - name: Deploy dist to cPanel via SSH
         env:
@@ -81,5 +73,5 @@ jobs:
           CPANEL_REMOTE_DIR: ${{ vars.CPANEL_REMOTE_DIR }}
         run: |
           rsync -avz --omit-dir-times --no-perms \
-            -e "ssh -p ${CPANEL_SSH_PORT:-22}" \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${CPANEL_SSH_PORT:-22}" \
             ./dist/ "$CPANEL_SSH_USERNAME@$CPANEL_SSH_HOST:$CPANEL_REMOTE_DIR"
