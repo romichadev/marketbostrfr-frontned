@@ -16,7 +16,7 @@ import { baseAPI } from './api/baseApi'
 const persistConfig = {
   key: 'auth',
   storage,
-  whitelist: ['user', 'accessToken'] // ❌ refreshToken remove
+  whitelist: ['user', 'accessToken'] 
 }
 
 const persistedReducer = persistReducer(persistConfig, authReducer)
@@ -26,6 +26,7 @@ export const store = configureStore({
     [baseAPI.reducerPath]: baseAPI.reducer,
     auth: persistedReducer,
   },
+  
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {

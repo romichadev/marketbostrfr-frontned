@@ -25,7 +25,7 @@ const baseQueryWithReauth: BaseQueryFn<
 
   let result = await baseQuery(args, api, extraOptions);
 
-  // 🔥 Access token expire
+  //  Access token expire
   if (result?.error?.status === 401) {
     console.log("Access expired → trying refresh...");
 
